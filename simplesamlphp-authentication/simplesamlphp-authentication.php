@@ -43,7 +43,13 @@ if ($simplesaml_authentication_opt['include_path'] == '') {
 
 if ($simplesaml_configured) {
 	$sp_auth = ($simplesaml_authentication_opt['sp_auth'] == '') ? 'default-sp' : $simplesaml_authentication_opt['sp_auth'];
-	$as = new SimpleSAML_Auth_Simple($sp_auth);
+        try {
+		$as = new SimpleSAML_Auth_Simple($sp_auth);
+	}
+	catch (Exception $e) {
+		$as = NULL;
+                $simplesaml_configured = false;		
+	}
 }
 
 // plugin hooks into authentication system
@@ -72,7 +78,12 @@ if ($slo) {
 			if (!isset($as)) {
 				global $simplesaml_authentication_opt;
 				$sp_auth = ($simplesaml_authentication_opt['sp_auth'] == '') ? 'default-sp' : $simplesaml_authentication_opt['sp_auth'];
-				$as = new SimpleSAML_Auth_Simple($sp_auth);
+				try {
+					$as = new SimpleSAML_Auth_Simple($sp_auth);
+				}
+				catch (Exception $e) {
+					return false;
+				}
 			}
 			
 			if(!$as->isAuthenticated()) {
@@ -106,10 +117,17 @@ if (!class_exists('SimpleSAMLAuthentication')) {
 			if (!$simplesaml_configured) {
 				die("simplesaml-authentication plugin not configured");
 			}
-			// Reset values from input ($_POST and $_COOKIE)
-			$username = $password = '';
-			
-			$as->requireAuth();
+
+			try {	
+				$as->requireAuth();
+			}
+			catch (Exception $e) {
+				return wp_login($username, $password);
+			}
+
+
+                        // Reset values from input ($_POST and $_COOKIE)
+                        $username = $password = '';
 			
 			$attributes = $as->getAttributes();
 			
