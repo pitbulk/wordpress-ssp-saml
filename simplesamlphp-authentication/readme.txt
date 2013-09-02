@@ -1,9 +1,9 @@
 === Plugin Name ===
-Contributors: davidoc, fkooman, usrlocaldick
+Contributors: davidoc, fkooman, usrlocaldick, smartin
 Tags: authentication, saml, simpleSAMLphp
 Requires at least: 3.0.0
-Tested up to: 3.3.1
-Stable tag: 0.6.3
+Tested up to: 3.5.1
+Stable tag: 0.3
 
 Authenticate users using simpleSAMLphp
 
@@ -44,6 +44,16 @@ Then use `wp_userid` as the username attribute.  Now **STAY LOGGED IN** to your 
 Starting from version 0.3.0 the plugin requires simpleSAMLphp 1.5 or higher. Use version 0.2.x of this plugin for simpleSAMLphp < 1.5 support.
 
 == Changelog ==
+
+= 0.3 =
+
+* Import changes from simplesamlphp-authentication 0.7 (Fixed security issue, Cleanup, removal of deprecated function calls)
+
+= 0.2 =
+
+* Avoid errors if plugin is bad configured. Wordpress will ignore the SAML plugin load.
+
+-- From the simplesamphp-authentication
 
 = 0.6.3 =
 * Fixed some bugs that occured when upgrading from 0.5.2 to 0.6.x
