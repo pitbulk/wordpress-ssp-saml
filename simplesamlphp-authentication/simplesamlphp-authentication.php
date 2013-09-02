@@ -61,6 +61,10 @@ add_action('retrieve_password', array('SimpleSAMLAuthenticator', 'disable_functi
 add_action('password_reset', array('SimpleSAMLAuthenticator', 'disable_function'));
 add_filter('show_password_fields', array('SimpleSAMLAuthenticator', 'show_password_fields'));
 
+if ($simplesaml_authentication_opt['redirect_main_page']) {
+    add_filter('login_redirect', array('SimpleSAMLAuthenticator', 'change_login_redirect'), 100, 3);
+}
+
 
 // Version logic
 $version = '0.7.0';
@@ -278,6 +282,11 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 			die('Disabled');
 		}
 
+        function change_login_redirect() {
+            wp_redirect(get_home_url());
+            die();
+        }
+
 	}
 }
 
@@ -299,7 +308,7 @@ function simplesaml_authentication_options_page() {
 	$options = array(
 		'new_user' => FALSE,
 		'slo' => FALSE,
-		'redirect_url' => '',
+		'redirect_main_page' => FALSE,
 		'email_suffix' => 'example.com',
 		'sp_auth' => 'default-sp',
 		'username_attribute' => 'uid',
@@ -319,7 +328,8 @@ function simplesaml_authentication_options_page() {
 		}
 
 		update_option('simplesaml_authentication_options', $options_updated);
-	}
+
+    }
   
 	// Get Options
 	$options = get_option('simplesaml_authentication_options');
@@ -401,10 +411,18 @@ function simplesaml_authentication_options_page() {
 
 	<tr valign="top">
 		<th scope="row"><label for="slo">Single Log Out</label></th>
-		<td><input type="checkbox" name="slo" id="slo" value="1" <?php checked('1', $options['slo']); ?> />
+		<td><input type="checkbox" name="slo" id="slo_inp" value="1" <?php checked('1', $options['slo']); ?> />
 		<span class="setting-description">Enable Single Log out</span>
 		</td>
 	</tr>
+
+	<tr valign="top">
+		<th scope="row"><label for="redirect_main_page">Redirect to main page after login</label></th>
+		<td><input type="checkbox" name="redirect_main_page" id="redirect_main_page_inp" value="1" <?php checked('1', $options['redirect_main_page']); ?> />
+		<span class="setting-description">Enable if you want to redirect the user to the main page instead of the admin panel</span>
+		</td>
+	</tr>
+
 </table>
 </fieldset>
 <div class="submit">

@@ -47,6 +47,7 @@ Starting from version 0.3.0 the plugin requires simpleSAMLphp 1.5 or higher. Use
 
 = 0.3 =
 
+* Add support to handler where to go after login: administration panel or wordpress main page
 * Import changes from simplesamlphp-authentication 0.7 (Fixed security issue, Cleanup, removal of deprecated function calls)
 
 = 0.2 =

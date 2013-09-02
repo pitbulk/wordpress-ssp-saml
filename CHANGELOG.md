@@ -1,7 +1,8 @@
 Changelog
 ---------
 
-0.3 Import changes from simplesamlphp-authentication 0.7 (Fixed security issue, Cleanup, removal of deprecated function calls)
+0.3 Add support to handler where to go after login: administration panel or wordpress main page
+    Import changes from simplesamlphp-authentication 0.7 (Fixed security issue, Cleanup, removal of deprecated function calls)
 
 0.2 Avoid errors if plugin is bad configured. Wordpress will ignore the SAML plugin load.
 
