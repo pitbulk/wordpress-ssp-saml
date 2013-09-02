@@ -148,8 +148,8 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 		 We call simpleSAMLphp to authenticate the user at the appropriate time.
 		 If the user has not logged in previously, we create an account for them.
 		*/
-		function authenticate($user, $username, $password ) {
-			if(is_a($user, 'WP_User')) { return $user; }
+		function authenticate($user, $username) {
+            if(is_a($user, 'WP_User')) { return $user; }
 
 			global $simplesaml_authentication_opt, $simplesaml_configured, $as;
 			
@@ -161,22 +161,24 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 				$as->requireAuth();
 			}
 			catch (Exception $e) {
-				return wp_login($username, $password);
+				die("SAML login could not be initiated");
 			}
 
 
             // Reset values from input ($_POST and $_COOKIE)
             $username = '';
-			$password = 'dummy'; // Gets reset later on.
-
 			
 			$attributes = $as->getAttributes();
-			
+
 			if(empty($simplesaml_authentication_opt['username_attribute'])) {
 				$username = $attributes['uid'][0];
-			} else {
+			} else if (!empty($attributes[$simplesaml_authentication_opt['username_attribute']])) {
 				$username = $attributes[$simplesaml_authentication_opt['username_attribute']][0];
 			}
+            else {
+                die("Could not retrieve user_id from the saml assertion");
+            }
+
 			
 			if ($username != substr(sanitize_user($username, TRUE), 0, 60)) {
 				$error = sprintf(__('<p><strong>ERROR</strong><br /><br />
@@ -187,11 +189,6 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 				$errors['registerfail'] = $error;
 				print($error);
 				exit();
-			}
-			
-	
-			if (!function_exists('get_user_by')) {
-				die("Could not load user data");
 			}
 			
 			$user = get_user_by('login', $username);
