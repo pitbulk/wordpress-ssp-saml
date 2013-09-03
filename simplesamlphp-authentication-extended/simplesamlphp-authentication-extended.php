@@ -26,24 +26,24 @@ Plugin based on: http://wordpress.org/plugins/simplesamlphp-authentication
 */
 
 
-add_action('admin_menu', 'simplesaml_authentication_add_options_page');
+add_action('admin_menu', 'simplesaml_authentication_extended_add_options_page');
 
-$simplesaml_authentication_opt = get_option('simplesaml_authentication_options');
+$simplesaml_authentication_extended_opt = get_option('simplesaml_authentication_extended_options');
 
 $simplesaml_configured = true;
 
 // Try to configure the simpleSAMLphp client
-if ($simplesaml_authentication_opt['include_path'] == '') {
+if ($simplesaml_authentication_extended_opt['include_path'] == '') {
 	$simplesaml_configured = false;
 } else { 
-	$include_file = $simplesaml_authentication_opt['include_path']."/lib/_autoload.php";
+	$include_file = $simplesaml_authentication_extended_opt['include_path']."/lib/_autoload.php";
 	if (!include_once($include_file)) {
 		$simplesaml_configured = false;
 	}
 }
 
 if ($simplesaml_configured) {
-	$sp_auth = ($simplesaml_authentication_opt['sp_auth'] == '') ? 'default-sp' : $simplesaml_authentication_opt['sp_auth'];
+	$sp_auth = ($simplesaml_authentication_extended_opt['sp_auth'] == '') ? 'default-sp' : $simplesaml_authentication_extended_opt['sp_auth'];
         try {
 		$as = new SimpleSAML_Auth_Simple($sp_auth);
 	}
@@ -61,14 +61,14 @@ add_action('retrieve_password', array('SimpleSAMLAuthenticator', 'disable_functi
 add_action('password_reset', array('SimpleSAMLAuthenticator', 'disable_function'));
 add_filter('show_password_fields', array('SimpleSAMLAuthenticator', 'show_password_fields'));
 
-if ($simplesaml_authentication_opt['redirect_main_page']) {
+if ($simplesaml_authentication_extended_opt['redirect_main_page']) {
     add_filter('login_redirect', array('SimpleSAMLAuthenticator', 'change_login_redirect'), 100, 3);
 }
 
 
 // Version logic
 $version = '0.7.0';
-$previous_version = get_option('simplesaml_authentication_version');
+$previous_version = get_option('simplesaml_authentication_extended_version');
 if($previous_version){
 	/*
 	#Version comparison. Not yet needed as this is the first release that has a database version number.
@@ -79,7 +79,7 @@ if($previous_version){
 } else {
 	# No previous version detected -> that means possibly vulnerable passwords
 	fix_vulnerable_passwords();
-	update_option('simplesaml_authentication_version', $version);
+	update_option('simplesaml_authentication_extended_version', $version);
 }
 
 
@@ -107,7 +107,7 @@ function invalidate_password($ID) {
 }
 
 
-$slo = $simplesaml_authentication_opt['slo'];
+$slo = $simplesaml_authentication_extended_opt['slo'];
 
 if ($slo) {
 	/*
@@ -122,8 +122,8 @@ if ($slo) {
 		if ( $user->ID > 0 ) {
 			// User is local authenticated but SP session was closed
 			if (!isset($as)) {
-				global $simplesaml_authentication_opt;
-				$sp_auth = ($simplesaml_authentication_opt['sp_auth'] == '') ? 'default-sp' : $simplesaml_authentication_opt['sp_auth'];
+				global $simplesaml_authentication_extended_opt;
+				$sp_auth = ($simplesaml_authentication_extended_opt['sp_auth'] == '') ? 'default-sp' : $simplesaml_authentication_extended_opt['sp_auth'];
 				try {
 					$as = new SimpleSAML_Auth_Simple($sp_auth);
 				}
@@ -155,7 +155,7 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 		function authenticate($user, $username) {
             if(is_a($user, 'WP_User')) { return $user; }
 
-			global $simplesaml_authentication_opt, $simplesaml_configured, $as;
+			global $simplesaml_authentication_extended_opt, $simplesaml_configured, $as;
 			
 			if (!$simplesaml_configured) {
 				die("simplesaml-authentication plugin not configured");
@@ -174,10 +174,10 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 			
 			$attributes = $as->getAttributes();
 
-			if(empty($simplesaml_authentication_opt['username_attribute'])) {
+			if(empty($simplesaml_authentication_extended_opt['username_attribute'])) {
 				$username = $attributes['uid'][0];
-			} else if (!empty($attributes[$simplesaml_authentication_opt['username_attribute']])) {
-				$username = $attributes[$simplesaml_authentication_opt['username_attribute']][0];
+			} else if (!empty($attributes[$simplesaml_authentication_extended_opt['username_attribute']])) {
+				$username = $attributes[$simplesaml_authentication_extended_opt['username_attribute']][0];
 			}
             else {
                 die("Could not retrieve user_id from the saml assertion");
@@ -202,7 +202,7 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 				return $user;
 			} else {
 				// First time logging in
-				if ($simplesaml_authentication_opt['new_user'] == 1) {
+				if ($simplesaml_authentication_extended_opt['new_user'] == 1) {
 					// Auto-registration is enabled
 					// User is not in the WordPress database
 					// They passed SimpleSAML and so are authorised
@@ -210,15 +210,15 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 					
 					// User must have an e-mail address to register
 					$user_email = '';
-					$email_attribute = empty($simplesaml_authentication_opt['email_attribute']) ? 'mail' : $simplesaml_authentication_opt['email_attribute'];
+					$email_attribute = empty($simplesaml_authentication_extended_opt['email_attribute']) ? 'mail' : $simplesaml_authentication_extended_opt['email_attribute'];
 						
 					if($attributes[$email_attribute][0]) {
 						// Try to get email address from attribute
 						$user_email = $attributes[$email_attribute][0];
 					} else {
 						// Otherwise use default email suffix
-						if ($simplesaml_authentication_opt['email_suffix'] != '') {
-							$user_email = $username . '@' . $simplesaml_authentication_opt['email_suffix'];
+						if ($simplesaml_authentication_extended_opt['email_suffix'] != '') {
+							$user_email = $username . '@' . $simplesaml_authentication_extended_opt['email_suffix'];
 						}
 					}
 					
@@ -227,22 +227,22 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 					$user_info['user_pass'] = 'dummy'; // Gets reset later on.
 					$user_info['user_email'] = $user_email;
 					
-					if(empty($simplesaml_authentication_opt['firstname_attribute'])) {
+					if(empty($simplesaml_authentication_extended_opt['firstname_attribute'])) {
 						$user_info['first_name'] = $attributes['givenName'][0];
 					} else {
-						$user_info['first_name'] = $attributes[$simplesaml_authentication_opt['firstname_attribute']][0];
+						$user_info['first_name'] = $attributes[$simplesaml_authentication_extended_opt['firstname_attribute']][0];
 					}
 					
-					if(empty($simplesaml_authentication_opt['lastname_attribute'])) {
+					if(empty($simplesaml_authentication_extended_opt['lastname_attribute'])) {
 						$user_info['last_name'] = $attributes['sn'][0];
 					} else {
-						$user_info['last_name'] = $attributes[$simplesaml_authentication_opt['lastname_attribute']][0];
+						$user_info['last_name'] = $attributes[$simplesaml_authentication_extended_opt['lastname_attribute']][0];
 					}
 					
 					// Set user role based on eduPersonEntitlement
-					if ($simplesaml_authentication_opt['admin_entitlement'] != '' &&
+					if ($simplesaml_authentication_extended_opt['admin_entitlement'] != '' &&
 						$attributes['eduPersonEntitlement'] &&
-						in_array($simplesaml_authentication_opt['admin_entitlement'],
+						in_array($simplesaml_authentication_extended_opt['admin_entitlement'],
 						$attributes['eduPersonEntitlement'])) {
 						$user_info['role'] = "administrator";
 					} else {
@@ -266,7 +266,7 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 
 
 		function logout() {
-			global $simplesaml_authentication_opt, $simplesaml_configured, $as;
+			global $simplesaml_authentication_extended_opt, $simplesaml_configured, $as;
 			if (!$simplesaml_configured) {
 				die("simplesaml-authentication not configured");
 			}
@@ -294,14 +294,14 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 //		ADMIN OPTION PAGE FUNCTIONS
 //----------------------------------------------------------------------------
 
-function simplesaml_authentication_add_options_page() {
+function simplesaml_authentication_extended_add_options_page() {
 	if (function_exists('add_options_page')) {
 		add_options_page('simpleSAMLphp Authentication', 'simpleSAMLphp Authentication', 'manage_options',
-			basename(__FILE__), 'simplesaml_authentication_options_page');
+			basename(__FILE__), 'simplesaml_authentication_extended_options_page');
 	}
 }
 
-function simplesaml_authentication_options_page() {
+function simplesaml_authentication_extended_options_page() {
 	global $wpdb;
 	
 	// Default options
@@ -327,12 +327,12 @@ function simplesaml_authentication_options_page() {
 			$options_updated[$key] = isset($_POST[$key]) ? $_POST[$key] : $options[$key];
 		}
 
-		update_option('simplesaml_authentication_options', $options_updated);
+		update_option('simplesaml_authentication_extended_options', $options_updated);
 
     }
   
 	// Get Options
-	$options = get_option('simplesaml_authentication_options');
+	$options = get_option('simplesaml_authentication_extended_options');
   
 ?>
 
