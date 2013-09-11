@@ -254,7 +254,17 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 					}
 					
 					$wp_uid = wp_insert_user($user_info);
-                    invalidate_password($wp_uid);
+
+					if ( is_object($wp_uid) && is_a($wp_uid, 'WP_Error') ) {
+						$error = $wp_uid->get_error_messages();
+						$error = implode("<br>", $error);
+						$error = '<p><strong>ERROR</strong>: '.$error.'</p>';
+						print_r($error);
+						$errors['registerfail'] = $error;
+						exit();            
+					}
+
+					invalidate_password($wp_uid);
 					return get_user_by('login', $username);
 				} else {
 					$error = sprintf(__('<p><strong>ERROR</strong>: %s is not registered with this blog.

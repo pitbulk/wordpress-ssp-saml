@@ -1,7 +1,9 @@
 Changelog
 ---------
 
-0.3 Add support to handler where to go after login: administration panel or wordpress main page
+0.3 Handle errors when creating new users
+    Use 'default_role' param to set a role for new users
+    Add support to handler where to go after login: administration panel or wordpress main page
     Import changes from simplesamlphp-authentication 0.7 (Fixed security issue, Cleanup, removal of deprecated function calls)
     Rename plugin
 
