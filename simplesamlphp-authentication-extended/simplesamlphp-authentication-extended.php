@@ -245,7 +245,11 @@ if (!class_exists('SimpleSAMLAuthenticator')) {
 						in_array($simplesaml_authentication_extended_opt['admin_entitlement'],
 						$attributes['eduPersonEntitlement'])) {
 						$user_info['role'] = "administrator";
-					} else {
+					}
+					else if($simplesaml_authentication_extended_opt['default_role'] != '') {
+						$user_info['role'] = $simplesaml_authentication_extended_opt['default_role'];
+					}
+					else {
 						$user_info['role'] = "author";
 					}
 					
